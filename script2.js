@@ -6,6 +6,7 @@ let isGameOver = false
 let snakeBody = []
 let moveSnakeId
 let applePosition = []
+let position
 // box size : 500x500
 // blockNumber : 25
 // blockSize : 500/25=20
@@ -67,16 +68,21 @@ const crossingBlock = () => {
 }
 
 const initialSnake = () => {
-  for (let i = 21; i < 23; i++) {
-    console.log(i);
+  for (let i = 5; i < 6; i++) {
     let newSnake = new Snake([1, i])
-    snakeBody.push(newSnake)
+    snakeBody.unshift(newSnake)
   }
 }
 
 const initialApple = () => {
-  // let position = [randomPosition(), randomPosition()]
-  let position = [1, 23]
+  if (count < 2) {
+    position = [1, 7]
+    count++
+  } else {
+    // position = [1, 14]
+    position = [randomPosition(), randomPosition()]
+  }
+  applePosition = []
   let newApple = new Apple(position)
   applePosition.push(newApple)
 }
@@ -112,7 +118,7 @@ const checkGameOver = () => {
 const checkWall = () => {
   const { left: snakeHeadLeft, bottom: snakeHeadBottom } = snakeBody[0]
   const check9 = (snakeHeadLeft < 0)
-  const check3 = (snakeHeadLeft >= 24)
+  const check3 = (snakeHeadLeft > 24)
   const check6 = (snakeHeadBottom < 0)
   const check12 = (snakeHeadBottom > 24)
   // const check = [check9, check3, check6, check12]
@@ -137,9 +143,6 @@ const moveSnake = () => {
   let copyBody = [...snakeBody]
   snakeBody = []
 
-  // console.log(count);
-  // count++
-
   copyBody.forEach(part => {
     let { left: snakeLeft, bottom: snakeBottom } = part
 
@@ -157,7 +160,21 @@ const hitApple = () => {
   let { left: headLeft, bottom: headBottom } = snakeBody[0]
 
   const isHit = (appleLeft === headLeft) && (appleBottom === headBottom)
-  // console.log(isHit);
+
+  if (isHit) {
+    applePosition[0].visual.classList.remove('apple')
+    initialApple()
+    addBody()
+  }
+}
+
+const addBody = () => {
+  const length = snakeBody.length
+  const { left, bottom } = snakeBody[length - 1]
+
+  let newLastPart = new Snake([left, bottom - 1])
+  snakeBody.push(newLastPart)
+  console.log('snake add body');
 }
 
 const moveUp = () => {
@@ -176,11 +193,11 @@ const moveRight = () => {
 let count = 1
 function start() {
   if (!isGameOver) {
-    // initialApple()
+    initialApple()
     initialSnake()
     moveSnakeId = setInterval(() => {
       moveSnake()
-      // hitApple()
+      hitApple()
     }, 1000)
     addEventListener('keyup', control)
   }
